@@ -5,7 +5,7 @@ pipeline {
         string(name: 'DOCKER_REPOSITORY', defaultValue: 'djoumessi22/momo', description: 'Name of the Docker repository')
         string(name: 'DOCKER_TAG', defaultValue: '0.0.1', description: 'Tag for the Docker image')
         string(name: 'CONTAINER_NAME', defaultValue: 'babette_container', description: 'Name of the Docker container')
-        string(name: 'HOST_PORT', defaultValue: '8017', description: 'Host port to bind')
+        string(name: 'HOST_PORT', defaultValue: '8033', description: 'Host port to bind')
     }
 
     stages {
