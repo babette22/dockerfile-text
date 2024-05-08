@@ -27,6 +27,7 @@ pipeline {
                     def scannerHome = tool 'SonarScanner'
                     def projectKey = 'dockerfile-test-project'
                     withSonarQubeEnv('SonarScanner') {
+                        sh 'mvn -B verify sonar:sonar'
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=${projectKey}"
                     }
