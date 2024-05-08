@@ -57,4 +57,26 @@ pipeline {
             steps {
                 script {
                     def dockerRepository = params.DOCKER_REPOSITORY
+                    def dockerTag = params.DOCKER_TAG
+
+                    sh "docker push $dockerRepository:$dockerTag"
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    def dockerRepository = params.DOCKER_REPOSITORY
+                    def dockerTag = params.DOCKER_TAG
+                    def containerName = params.CONTAINER_NAME
+                    def hostPort = params.HOST_PORT
+
+                    sh "docker run -d -p $hostPort:80 --name $containerName $dockerRepository:$dockerTag"
+                }
+            }
+        }
+
+        // Add more stages here as needed
+    }
 }
