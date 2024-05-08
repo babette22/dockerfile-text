@@ -17,7 +17,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'babette22-docker', credentialsId: 'jenkins-ssh-agents-private-key', url: 'git@github.com:babette22/dockerfile-text.git'
+                git branch: 'main', credentialsId: 'jenkins-ssh-agents-private-key', url: 'git@github.com:babette22/dockerfile-text.git'
             }
         }
 
