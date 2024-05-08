@@ -57,3 +57,4 @@ pipeline {
             steps {
                 script {
                     def dockerRepository = params.DOCKER_REPOSITORY
+}
