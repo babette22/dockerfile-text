@@ -5,7 +5,7 @@ pipeline {
         string(name: 'DOCKER_REPOSITORY', defaultValue: 'djoumessi22/momo', description: 'Name of the Docker repository')
         string(name: 'DOCKER_TAG', defaultValue: '0.0.1', description: 'Tag for the Docker image')
         string(name: 'CONTAINER_NAME', defaultValue: 'babette_container', description: 'Name of the Docker container')
-        string(name: 'HOST_PORT', defaultValue: '8027', description: 'Host port to bind')
+        string(name: 'HOST_PORT', defaultValue: '8017', description: 'Host port to bind')
     }
 
     stages {
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
-                    def projectKey = env.JOB_NAME.replaceAll("[^a-zA-Z0-9]", "_") // Using JOB_NAME as project key
+                    def projectKey = 'dockerfile-test-project'
                     withSonarQubeEnv('SonarScanner') {
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=${projectKey}"
@@ -57,26 +57,3 @@ pipeline {
             steps {
                 script {
                     def dockerRepository = params.DOCKER_REPOSITORY
-                    def dockerTag = params.DOCKER_TAG
-
-                    sh "docker push $dockerRepository:$dockerTag"
-                }
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
-                script {
-                    def dockerRepository = params.DOCKER_REPOSITORY
-                    def dockerTag = params.DOCKER_TAG
-                    def containerName = params.CONTAINER_NAME
-                    def hostPort = params.HOST_PORT
-
-                    sh "docker run -d -p $hostPort:80 --name $containerName $dockerRepository:$dockerTag"
-                }
-            }
-        }
-
-        // Add more stages here as needed
-    }
-}
