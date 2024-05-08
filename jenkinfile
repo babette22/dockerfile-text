@@ -1,0 +1,82 @@
+pipeline {
+    agent { label 'SERVER03' }
+
+    parameters {
+        string(name: 'DOCKER_REPOSITORY', defaultValue: 'djoumessi22/momo', description: 'Name of the Docker repository')
+        string(name: 'DOCKER_TAG', defaultValue: '0.0.1', description: 'Tag for the Docker image')
+        string(name: 'CONTAINER_NAME', defaultValue: 'babette_01_container', description: 'Name of the Docker container')
+        string(name: 'HOST_PORT', defaultValue: '8093', description: 'Host port to bind')
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('Clone Repository') {
+            steps {
+                git branch: 'babette22-docker', credentialsId: 'jenkins-ssh-agents-private-key', url: 'git@github.com:babette22/dockerfile-text.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    def projectKey = 'dockerfile-test-project'
+                    withSonarQubeEnv('SonarScanner') {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=${projectKey}"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def dockerRepository = params.DOCKER_REPOSITORY
+                    def dockerTag = params.DOCKER_TAG
+
+                    sh "docker build -t $dockerRepository:$dockerTag ."
+                }
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-babette-credential', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                    sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def dockerRepository = params.DOCKER_REPOSITORY
+                    def dockerTag = params.DOCKER_TAG
+
+                    sh "docker push $dockerRepository:$dockerTag"
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    def dockerRepository = params.DOCKER_REPOSITORY
+                    def dockerTag = params.DOCKER_TAG
+                    def containerName = params.CONTAINER_NAME
+                    def hostPort = params.HOST_PORT
+
+                    sh "docker run -d -p $hostPort:80 --name $containerName $dockerRepository:$dockerTag"
+                }
+            }
+        }
+
+        // Add more stages here as needed
+    }
+}

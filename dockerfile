@@ -16,6 +16,7 @@ RUN rm -rf *
 # Download and unzip the code
 RUN wget https://linux-devops-course.s3.amazonaws.com/halloween.zip && \
     unzip halloween.zip && \
+    mkdir -p /usr/local/apache2/htdocs/saves && \
     mv halloween/* /usr/local/apache2/htdocs/saves && \
     rm -rf halloween.zip halloween
 
