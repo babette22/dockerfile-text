@@ -2,10 +2,10 @@ pipeline {
     agent { label 'SERVER03' }
 
     parameters {
-        string(name: 'DOCKER_REPOSITORY', defaultValue: '', description: 'Name of the Docker repository')
-        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Tag for the Docker image')
-        string(name: 'CONTAINER_NAME', defaultValue: 'my_container', description: 'Name of the Docker container')
-        string(name: 'HOST_PORT', defaultValue: '', description: 'Host port to bind')
+        string(name: 'DOCKER_REPOSITORY', defaultValue: 'djoumessi22/momo', description: 'Name of the Docker repository')
+        string(name: 'DOCKER_TAG', defaultValue: '0.0.1', description: 'Tag for the Docker image')
+        string(name: 'CONTAINER_NAME', defaultValue: 'babette_container', description: 'Name of the Docker container')
+        string(name: 'HOST_PORT', defaultValue: '8027', description: 'Host port to bind')
     }
 
     stages {
