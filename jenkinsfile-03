@@ -1,0 +1,67 @@
+pipeline {
+    agent { label 'SERVER03' } // Specifies the agent to use for this pipeline
+
+    parameters {
+        string(name: 'PORT_NUMBER', defaultValue: '8080', description: 'Port number to publish the container')
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch name')
+        string(name: 'DOCKER_REPOSITORY', defaultValue: 'dollards2', description: 'Name of the Docker repository')
+        booleanParam(name: 'runDockerStages', defaultValue: false, description: 'Run Docker stages?')
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${params.BRANCH_NAME}", credentialsId: 'jenkins-ssh-agents-private-key', url: 'git@github.com:babette22/dockerfile-text.git'
+            }
+        }
+
+        stage('Docker login') {
+            when {
+                expression { params.runDockerStages }
+            }
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-babette-credential', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                        sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker image') {
+            when {
+                expression { params.runDockerStages }
+            }
+            steps {
+                script {
+                    sh "docker build -t ${params.DOCKER_REPOSITORY}:${params.BRANCH_NAME} ."
+                }
+            }
+        }
+
+        stage('Push Docker image') {
+            when {
+                expression { params.runDockerStages }
+            }
+            steps {
+                script {
+                    sh "docker tag ${params.DOCKER_REPOSITORY}:${params.BRANCH_NAME} djoumessi22/${params.DOCKER_REPOSITORY}:${params.BRANCH_NAME}"
+                    sh "docker push djoumessi22/${params.DOCKER_REPOSITORY}:${params.BRANCH_NAME}"
+                }
+            }
+        }
+
+        stage('Run Docker image') {
+            when {
+                expression { params.runDockerStages }
+            }
+            steps {
+                script {
+                    sh "docker run -d -p ${params.PORT_NUMBER}:80 djoumessi22/${params.DOCKER_REPOSITORY}:${params.BRANCH_NAME}"
+                }
+            }
+        }
+
+        // Add more stages for testing, deployment, etc.
+    }
+}
